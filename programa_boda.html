@@ -207,10 +207,8 @@ if(new URLSearchParams(location.search).has("fotos")){
  const fi=$("fi"),q=$("q"),send=$("send");let items=[];
  const b64=b=>new Promise(r=>{const f=new FileReader;f.onload=()=>r(f.result.split(",")[1]);f.readAsDataURL(b)});
  async function prep(file){
-  try{let bmp;try{bmp=await createImageBitmap(file,{imageOrientation:"from-image"})}catch(e){bmp=await new Promise((ok,no)=>{const i=new Image;i.onload=()=>ok(i);i.onerror=no;i.src=URL.createObjectURL(file)})}
-   const w=bmp.width||bmp.naturalWidth,h=bmp.height||bmp.naturalHeight,s=Math.min(1,1800/Math.max(w,h)),c=document.createElement("canvas");c.width=Math.round(w*s);c.height=Math.round(h*s);
-   c.getContext("2d").drawImage(bmp,0,0,c.width,c.height);const bl=await new Promise(r=>c.toBlob(r,"image/jpeg",.86));if(!bl)throw 0;return{data:await b64(bl),tipo:"image/jpeg",prev:URL.createObjectURL(bl)}}
-  catch(e){if(file.size>6e6)throw e;return{data:await b64(file),tipo:file.type||"image/jpeg",prev:""}}}
+  if(file.size>30e6)throw 0;
+  return{data:await b64(file),tipo:file.type||"image/jpeg",prev:URL.createObjectURL(file)}}
  function draw(){q.innerHTML=items.map((x,i)=>`<div class="qi ${x.s||""}" data-i="${i}"><img alt="" src="${x.prev||""}"><div>${esc(x.f.name)}</div><i>${x.s=="ok"?"Enviada ✓":x.s=="er"?"Error":x.s=="go"?"Enviando…":"Lista"}</i></div>`).join("");send.hidden=!items.some(x=>x.s!="ok")}
  fi.onchange=async()=>{const fs=[...fi.files].slice(0,40);fi.value="";$("thx").hidden=true;
   for(const f of fs){const x={f,s:""};items.push(x);try{Object.assign(x,await prep(f))}catch(e){x.s="er"}}draw()};
